@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block body %}
+<p>{{ post.pk }}번 글</p>
+{{ post.content}}
+<a href="{% url 'posts:edit' post.pk %}" class="btn btn-outline-warning btn-sm" role="button">수정</a>
+<form action="{% url 'posts:delete' post.pk %}" method="POST" >
+    {% csrf_token %}
+    <input type="submit" class="btn btn-outline-danger btn-sm" role="button" value="삭제">
+</form>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block body %}
+<h2>new post</h2>
+<form action="{% url 'posts:list' %}" method="POST">
+    {% csrf_token %}
+    {{ post_form }}
+    <input type='submit' value="등록!">
+</form>
+{% endblock %}
