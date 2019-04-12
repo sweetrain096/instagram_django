@@ -4,6 +4,7 @@ from django.urls import reverse
 # Create your models here.
 class Post(models.Model):
     content = models.TextField()
+
     
     def __str__(self):
         return f'Post : {self.pk} - {self.content}'

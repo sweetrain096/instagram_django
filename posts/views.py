@@ -5,15 +5,21 @@ from .forms import PostForm
 # Create your views here.
 def list(request):
     posts = Post.objects.all()
-    
     context = {'posts' : posts}
-    return render(request, 'posts/list.html', context)
     
+    return render(request, 'posts/list.html', context)
+
+
 def create(request):
     if request.method == 'POST':
-        post_form = PostForm(request.POST)
+        print("hi?")
+        post_form = PostForm(request.POST, request.FILES)
         if post_form.is_valid():
+            print("in!")
             post_form.save()
+            return redirect('posts:list')
+        else:
+            print("no TT")
     else:
         post_form = PostForm()
     context = {'post_form' : post_form}
@@ -27,12 +33,8 @@ def detail(request, post_pk):
     
 def edit(request, post_pk):
     post = get_object_or_404(Post, pk=post_pk)
-    if request.method == 'POST':
-        post_form = PostForm(request.POST, instance=post)
-        if post_form.is_valid():
-            post_form.save()
-    else:
-        post_form = PostForm(instance=post)
+    post_form = PostForm(initial=post.__dict__)
+    
     context = {'post_form' : post_form}
         
     return render(request, 'posts/form.html', context)
