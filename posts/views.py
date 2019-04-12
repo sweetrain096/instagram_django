@@ -4,7 +4,7 @@ from .forms import PostForm, ImageForm
 
 # Create your views here.
 def list(request):
-    posts = Post.objects.all()
+    posts = Post.objects.order_by('-id')
     context = {'posts' : posts}
     
     return render(request, 'posts/list.html', context)
@@ -23,7 +23,7 @@ def create(request):
                     image = image_form.save(commit=False)
                     image.post = post
                     image.save()
-            return redirect('posts:detail', post.pk)
+            return redirect('posts:list')
     else:
         post_form = PostForm()
         image_form = ImageForm()
@@ -33,18 +33,19 @@ def create(request):
     
 def detail(request, post_pk):
     post = get_object_or_404(Post, pk=post_pk)
-    context = {'post' : post}
+    posts = Post.objects.order_by('-id')
+    context = {'post' : post, 'posts' : posts}
     return render(request, 'posts/detail.html', context)
     
 def edit(request, post_pk):
     post = get_object_or_404(Post, pk=post_pk)
     if request.method == 'POST':
-        post_form = PostForm(request.POST, request.FILES)
+        post_form = PostForm(request.POST, instance=post)
         if post_form.is_valid():
             post.content = post_form.cleaned_data.get('content')
-            post.image = post_form.cleaned_data.get('image')
             post.save()
-            return redirect('posts:detail', post_pk)
+            
+            return redirect('posts:list')
     else:
         post_form = PostForm(initial=post.__dict__)
     
