@@ -1,44 +1,10 @@
 {% extends 'base.html' %}
 {% block css %}
 <style>
-    /*.crop{*/
-    /*    position: relative;*/
-    /*    padding:5px;*/
-    /*    max-width: 100%;*/
-        
-    /*}*/
-    .crop{
-        
+    #index_img:hover{
+        background-color:#ffffff;
+        opacity: 0.5;
     }
-    .crop:after{
-        content: "";
-        display: block;
-        padding-bottom: 100%;
-    }
-    
-    .crop.inner{
-        position: absolute;
-        width: 100%;
-        height: 100%;
-    }
-    
-    /*.wrap{*/
-    /*    position:relative;*/
-    /*    width:10%;*/
-    /*    padding:10%;*/
-    /*    box-sizing:border-box;*/
-    /*    border: 1px solid #ddd;*/
-    /*}*/
-    /*.inner{*/
-    /*    top: 0;*/
-    /*    right: 0;*/
-    /*}*/
-    /*img {*/
-    /*  max-width: 100%;*/
-    /*  padding:0 20% 0 20%;*/
-    /*  height: auto;*/
-
-    /*}*/
 
 </style>
 
@@ -50,15 +16,19 @@
 <div class="row">
 {% for post in posts %}
 
-    <div class="col-4 crop">
-        <div class="inner">
-            <a href="{% url 'posts:detail' post.pk %}"><img src="{{ post.image.url }}" class="card-img-top" alt="..."></a>
-        </div>
+    <div id="size" class="col-4 my-3">
+        <a href="{% url 'posts:detail' post.pk %}">
+            <div id="index_img" style="background-image:url({{ post.image.url }}); width:100%; height:0%; padding-bottom: 100%; background-position:center;">
+                
+            </div>
+        </a>
     </div>
-
+    
 {% endfor %}
 </div>
-
+    <!--<div class="inner">-->
+    <!--    <img src="{{ post.image.url }}" class="card-img-top" alt="...">-->
+    <!--</div>-->
 <!--{% for post in posts %}-->
 <!--<li>{{ post.content }}</li>-->
 <!--<a href="{% url 'posts:detail' post.pk %}" class="btn btn-outline-info btn-sm" role="button">자세히보기</a><hr>-->

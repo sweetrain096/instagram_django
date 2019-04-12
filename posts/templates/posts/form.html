@@ -1,10 +1,12 @@
 {% extends 'base.html' %}
 {% block body %}
+{% load crispy_forms_tags %}
 
 <h2>new post</h2>
 <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ post_form }}
+    {{ post_form|crispy }}
+    {{ image_form|crispy }}
     <input type='submit' value="등록!">
 </form>
 {% endblock %}
