@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% block body %}
 <p>{{ post.pk }}번 글</p>
-{{ post.content}}
+<p>{{ post.content}}</p>
+<img src="{{ post.image.url }}"><br>
 <a href="{% url 'posts:edit' post.pk %}" class="btn btn-outline-warning btn-sm" role="button">수정</a>
 <form action="{% url 'posts:delete' post.pk %}" method="POST" >
     {% csrf_token %}

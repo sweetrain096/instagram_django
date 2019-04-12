@@ -8,7 +8,7 @@
         
     /*}*/
     .crop{
-        border: 1px solid red;
+        
     }
     .crop:after{
         content: "";
@@ -52,7 +52,7 @@
 
     <div class="col-4 crop">
         <div class="inner">
-            <a href="{% url 'posts:detail' post.pk %}"><img src="http://lorempixel.com/400/400" class="card-img-top" alt="..."></a>
+            <a href="{% url 'posts:detail' post.pk %}"><img src="{{ post.image.url }}" class="card-img-top" alt="..."></a>
         </div>
     </div>
 

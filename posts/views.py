@@ -12,14 +12,10 @@ def list(request):
 
 def create(request):
     if request.method == 'POST':
-        print("hi?")
         post_form = PostForm(request.POST, request.FILES)
         if post_form.is_valid():
-            print("in!")
-            post_form.save()
-            return redirect('posts:list')
-        else:
-            print("no TT")
+            post = post_form.save()
+            return redirect('posts:detail', post.pk)
     else:
         post_form = PostForm()
     context = {'post_form' : post_form}
