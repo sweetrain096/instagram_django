@@ -1,11 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Post
-from .forms import PostForm, ImageForm
+from .models import Post, Comment
+from .forms import PostForm, ImageForm, CommentForm
 
 # Create your views here.
 def list(request):
     posts = Post.objects.order_by('-id')
-    context = {'posts' : posts}
+    comment_form = CommentForm()
+    for post in posts:
+        post.comments = post.comment_set.all()
+        # print(post.comments)
+    context = {'posts' : posts, 'comment_form' : comment_form}
     
     return render(request, 'posts/list.html', context)
 
@@ -14,7 +18,9 @@ def create(request):
     if request.method == 'POST':
         post_form = PostForm(request.POST)
         if post_form.is_valid():
-            post = post_form.save()
+            post = post_form.save(commit=False)
+            post.user = request.user
+            post.save()
             files = request.FILES.getlist('file')
             for file in files:
                 request.FILES['file'] = file
@@ -59,3 +65,18 @@ def delete(request, post_pk):
         return redirect('posts:list')
     else:
         return redirect('posts:detail', post_pk)
+        
+        
+def create_comment(request, post_pk):
+    print(post_pk)
+    post = Post.objects.get(pk = post_pk)
+    # comment_form = CommentForm()
+    if request.method == 'POST':
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid():
+            comment = comment_form.save(commit=False)
+            comment.post = post
+            comment.user = request.user
+            comment.save()
+
+    return redirect('posts:list')

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Post, Image
+from .models import Post, Image, Comment
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 
@@ -21,3 +21,13 @@ class ImageForm(forms.ModelForm):
         widgets = {
             'file' : forms.FileInput(attrs={'multiple' : True}),
         }
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ('content',)
+        widgets = {
+            'content' : forms.TextInput(attrs={'placeholder': '댓글 달기...', 'class' : 'myfieldclass'}),
+        }
+        labels = { 'content': '', }
+        

@@ -5,6 +5,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm, PasswordChangeForm
 
 from .forms import UserCustomCreationForm, UserCustomChangeForm
+from posts.models import Post, Comment
+from posts.forms import CommentForm
 
 # Create your views here.
 def signup(request):
@@ -38,7 +40,16 @@ def logout(request):
 
 
 def mypage(request, user_name):
-    return render(request, 'accounts/mypage.html')
+    posts = Post.objects.order_by('-id')
+    comment_form = CommentForm()
+    for post in posts:
+        post.comments = post.comment_set.all()
+        # print(post.comments)
+    context = {'posts' : posts, 'comment_form' : comment_form}
+    
+    return render(request, 'accounts/mypage.html', context)
+    
+    
     
 def edit(request, user_name):
     if request.method == 'POST':
