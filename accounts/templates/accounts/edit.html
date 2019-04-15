@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<h1>프로필 수정</h1>
+{% load crispy_forms_tags %}
+<form method="POST">
+    {% csrf_token %}
+    {{ user_form|crispy }}
+    <input type="submit" class="button">
+</form>
+
+{% endblock %}
