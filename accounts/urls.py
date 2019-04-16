@@ -10,4 +10,5 @@ urlpatterns = [
     path('<str:user_name>/', views.mypage, name="mypage"),
     path('<str:user_name>/edit/', views.edit, name="edit"),
     path('<str:user_name>/password/', views.password, name="password"),
+    path('<str:user_name>/<int:post_pk>/like/', views.like, name='like'),
 ]

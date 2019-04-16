@@ -7,8 +7,16 @@ from django.contrib.auth import get_user_model
 class Post(models.Model):
     content = models.TextField()
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    # users = models.ManyToManyField(settings.AUTH_USER_MODEL)
+    # 윗줄과 같이 작성을 하면
+    # user.post_set.all() - 게시글? 좋아요 한 글? 확인할 수 없다.
+    like_users = models.ManyToManyField(settings.AUTH_USER_MODEL,related_name='like_posts')
     # image = models.ImageField()
     
+    @property
+    def like_count(self):
+        return self.like_users.count()
+        
     def __str__(self):
         return f'Post : {self.pk} - {self.content}'
     

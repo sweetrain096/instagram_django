@@ -1,4 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+
 from .models import Post, Comment
 from .forms import PostForm, ImageForm, CommentForm
 
@@ -7,13 +10,13 @@ def list(request):
     posts = Post.objects.order_by('-id')
     comment_form = CommentForm()
     for post in posts:
-        post.comments = post.comment_set.all()
+        post.comments = post.comment_set.all()[:2]
         # print(post.comments)
     context = {'posts' : posts, 'comment_form' : comment_form}
     
     return render(request, 'posts/list.html', context)
 
-
+@login_required
 def create(request):
     if request.method == 'POST':
         post_form = PostForm(request.POST)
@@ -43,6 +46,7 @@ def detail(request, post_pk):
     context = {'post' : post, 'posts' : posts}
     return render(request, 'posts/detail.html', context)
     
+@login_required
 def edit(request, post_pk):
     post = get_object_or_404(Post, pk=post_pk)
     if request.method == 'POST':
@@ -57,7 +61,8 @@ def edit(request, post_pk):
     
     context = {'post_form' : post_form}
     return render(request, 'posts/form.html', context)
-    
+   
+@login_required 
 def delete(request, post_pk):
     post = get_object_or_404(Post, pk=post_pk)
     if request.method == 'POST':

@@ -5,6 +5,7 @@
         background-color:#ffffff;
         opacity: 0.5;
     }
+    1
 
 </style>
 
@@ -13,9 +14,9 @@
 {% block body %}
 {% for post in posts %}
 
-<div class="row d-flex justify-content-center">
-    <div class="container" style="width:80%">
-        <div class="row py-2" style="background-color: white; border: 1px solid #efefef; height: 60px">
+<div class="row d-flex justify-content-center my-5">
+    <div class="container" style="width:80%; border: solid #efefef; border-width:0px 1px;">
+        <div class="row py-2" style="background-color: white; border: solid #efefef; border-width:1px 0px; height: 60px">
             <div class="col-2"></div>
             <div class="col-8">{{post.user}}</div>
             {% if post.user == user %}
@@ -39,9 +40,7 @@
             
 
         </div>
-        <div class="row">
-            <div class="col-6">
-                <div id="carouse{{post.pk}}" class="carousel slide" data-ride="carousel" style="width: 600px; min-height: 384px;">
+        <div id="carouse{{post.pk}}" class="carousel slide" data-ride="carousel" style="min-height: 384px;">
                     <ol class="carousel-indicators">
                         {% for image in post.image_set.all %}
                         <li data-target="#carouse{{post.pk}}" data-slide-to="{{forloop.counter}} - {{forloop.counter0}}" ></li>
@@ -64,11 +63,57 @@
                         <span class="sr-only">Next</span>
                     </a>
                 </div>
-            </div>
-
+        <div class="col-3 d-flex justify-content-between">
+            <!--좋아요-->
+            {% if user in post.like_users.all %}
+                <a href="{% url 'accounts:like' user post.pk%}?next={% url 'posts:list' %}" style="color: red;"><i class="fas fa-heart fa-lg"></i></a>
+            {% else %}
+                <a href="{% url 'accounts:like' user post.pk%}?next={% url 'posts:list' %}" style="color: red;"><i class="far fa-heart fa-lg"></i></a>
+            {% endif %}
+            <i class="far fa-comment fa-lg"></i>
+            <i class="far fa-share-square fa-lg"></i>
         </div>
-    
+        <div class="m-3">
+            {% if post.like_count == False %}
+            {% elif post.like_count == 1 %}
+            <strong>{{ post.like_users.first }}</strong>님이 좋아합니다
+
+            {% else %}
+            <strong>{{ post.like_users.first }}</strong>님 외 <strong>{{ post.like_count|add:"-1" }}명</strong>이 좋아합니다
+            {% endif %}
+        </div>
+        <div class="m-3">
+            <strong>{{ post.user }}</strong> {{post.content}}
+        </div>
+        
+        {% if post.comment_set.all.count > 2 %}
+        <div class="m-3">
+            <a href="" style="color: gray">댓글 <strong>{{ post.comments.count }}</strong>개 모두 보기</a>
+        </div>
+        {% endif %}
+        
+        {% if post.comment_set.all.count == False %}
+        {% else %}
+        {% for comment in post.comments %}
+        <div class="m-3"><strong>{{comment.user}}</strong> {{comment.content}}</div>
+        {% endfor %}
+        {% endif %}
+        <div class="row py-3" style="border: solid #efefef; border-width:1px 0px;">
+            <div class="col-12">
+                
+                <form action="{% url 'posts:create_comment' post.pk %}" method="POST" >
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between">
+                        {{ comment_form }}
+                        <input type="submit" style="color:skyblue; background-color:white; border:white" value="게시">
+                    </div>
+                    
+                </form>
+            </div>
+        </div>
     </div>
+    
+        
 </div>
 
 

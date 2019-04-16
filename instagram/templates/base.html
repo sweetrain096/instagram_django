@@ -17,7 +17,7 @@
         font-size: 25px;
     }
     .myfieldclass{
-        width: 80%; 
+        width: 100%; 
         border: 0; 
         outline: 0;
     }
@@ -35,6 +35,12 @@
         {% endblock %}
         
     </div>
+    
+    {% if messages %}
+        {% for message in messages %}
+        <div{% if message.tags %} class="alert alert-{{ message.tags }}" role="alert"{% endif %}>{{ message }}</div>
+        {% endfor %}
+    {% endif %}
     {% include '_footer.html' %}
     
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
