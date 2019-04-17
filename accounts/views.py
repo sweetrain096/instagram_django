@@ -6,9 +6,11 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, User
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_POST
 
-from .forms import UserCustomCreationForm, UserCustomChangeForm
+from .forms import UserCustomCreationForm, UserCustomChangeForm, ProfileForm
+from .models import Profile
 from posts.models import Post, Comment
 from posts.forms import CommentForm
+
 
 # Create your views here.
 @require_http_methods(["GET", "POST"])
@@ -19,6 +21,7 @@ def signup(request):
         user_form = UserCustomCreationForm(request.POST)
         if user_form.is_valid():
             user = user_form.save()
+            Profile.objects.create(user=user)
             auth_login(request, user)
             return redirect('posts:list')
             
@@ -47,28 +50,45 @@ def logout(request):
     return redirect('posts:list')
 
 
-def mypage(request, user_name):
-    posts = request.user.post_set.order_by('-id')
+def detail(request, user_name):
+    User = get_user_model()
+    user = get_object_or_404(User, username=user_name)
+    posts = user.post_set.order_by('-id')
     comment_form = CommentForm()
     for post in posts:
         post.comments = post.comment_set.all()
         # print(post.comments)
-    context = {'posts' : posts, 'comment_form' : comment_form}
+    context = {'user_info' : user, 'posts' : posts, 'comment_form' : comment_form}
     
-    return render(request, 'accounts/mypage.html', context)
+    return render(request, 'accounts/detail.html', context)
     
+def follow(request, user_name):
+    User = get_user_model()
+    user = get_object_or_404(User, username = user_name)
     
-    
+    if request.user in user.followers.all():
+        user.followers.remove(request.user)
+    else:
+        user.followers.add(request.user)
+        
+    return redirect('accounts:detail', user_name)
+ 
 def edit(request, user_name):
     if request.method == 'POST':
         user_form = UserCustomChangeForm(request.POST, instance=request.user)
+        profile_form = ProfileForm(request.POST, 
+                                    request.FILES,
+                                    instance=request.user.profile)
         if user_form.is_valid():
-            user_form.save()
-            return redirect('posts:list')
+            if profile_form.is_valid():
+                user_form.save()
+                profile_form.save()
+                return redirect('accounts:detail', user_name)
     else:
         user_form = UserCustomChangeForm(instance=request.user)
+        profile_form = ProfileForm(instance=request.user.profile)
 
-    context = {"user_form" : user_form}
+    context = {"user_form" : user_form, "profile_form" : profile_form}
     return render(request, 'accounts/edit.html', context)
     
 def password(request, user_name):

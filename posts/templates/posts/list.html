@@ -1,12 +1,15 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block css %}
 <style>
     #index_img:hover{
         background-color:#ffffff;
         opacity: 0.5;
     }
-    1
-
+    #profile_img {
+        width: 60px; height: 60px;
+        border-radius: 50%;
+    }
 </style>
 
 {% endblock %}
@@ -14,13 +17,22 @@
 {% block body %}
 {% for post in posts %}
 
-<div class="row d-flex justify-content-center my-5">
-    <div class="container" style="width:80%; border: solid #efefef; border-width:0px 1px;">
-        <div class="row py-2" style="background-color: white; border: solid #efefef; border-width:1px 0px; height: 60px">
-            <div class="col-2"></div>
-            <div class="col-8">{{post.user}}</div>
-            {% if post.user == user %}
+<div class="row d-flex justify-content-center my-5" style="">
+    <div class="container" style="background-color: white; width:80%; border: solid #efefef; border-width:0px 1px;">
+        <!--헤더-->
+        <div class="row d-flex justify-content-between" style="background-color: white; border: solid #efefef; border-width:1px 1px; height: 60px">
+            <!--프사 및 이름 링크-->
+            <div class="col-8">
+                {% if post.user.profile.image %}
+                <img id="profile_img" src="{{ post.user.profile.image.url }}">
+                {% else %}
+                <img id="profile_img" src="{% static '짱절미.jpg' %}">
+                {% endif %}
+                <a href="{% url 'accounts:detail' post.user %}" style="color: black">{{post.user}}</a>
+            </div>
+            <!--개인 수정버튼-->
             <div class="col-1">
+                {% if post.user == user %}
                 <div class="btn-group">
                     
                     <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-ellipsis-h"></i></a>
@@ -33,13 +45,10 @@
                         </form>
                     </div>
                 </div>
+                {% endif %}
             </div>
-            {% else %}
-            <div class="col-1"></div>
-            {% endif %}
-            
-
         </div>
+        <!--body 사진-->
         <div id="carouse{{post.pk}}" class="carousel slide" data-ride="carousel" style="min-height: 384px;">
                     <ol class="carousel-indicators">
                         {% for image in post.image_set.all %}
@@ -63,41 +72,49 @@
                         <span class="sr-only">Next</span>
                     </a>
                 </div>
-        <div class="col-3 d-flex justify-content-between">
+        <!--좋아요 댓글 및 버튼-->
+        <div class="col my-3 d-flex justify-content-between">
             <!--좋아요-->
             {% if user in post.like_users.all %}
                 <a href="{% url 'accounts:like' user post.pk%}?next={% url 'posts:list' %}" style="color: red;"><i class="fas fa-heart fa-lg"></i></a>
             {% else %}
                 <a href="{% url 'accounts:like' user post.pk%}?next={% url 'posts:list' %}" style="color: red;"><i class="far fa-heart fa-lg"></i></a>
             {% endif %}
+            <span style="width:1%"></span>
             <i class="far fa-comment fa-lg"></i>
-            <i class="far fa-share-square fa-lg"></i>
+            <i class="far fa-share-square fa-lg" style="margin-left: auto"></i>
         </div>
+        
+        <!--좋아요 수 표시-->
         <div class="m-3">
             {% if post.like_count == False %}
             {% elif post.like_count == 1 %}
-            <strong>{{ post.like_users.first }}</strong>님이 좋아합니다
+            <strong><a href="{% url 'accounts:detail' post.like_users.first %}" style="color: black">{{ post.like_users.first }}</a></strong>님이 좋아합니다
 
             {% else %}
-            <strong>{{ post.like_users.first }}</strong>님 외 <strong>{{ post.like_count|add:"-1" }}명</strong>이 좋아합니다
+            <strong><a href="{% url 'accounts:detail' post.like_users.first %}" style="color: black">{{ post.like_users.first }}</a></strong>님 외 <strong>{{ post.like_count|add:"-1" }}명</strong>이 좋아합니다
             {% endif %}
         </div>
+        <!--글 내용-->
         <div class="m-3">
-            <strong>{{ post.user }}</strong> {{post.content}}
+            <strong><a href="{% url 'accounts:detail' post.user %}" style="color: black">{{ post.user }}</a></strong> {{post.content}}
         </div>
-        
+        <!--댓글 여러개일때 상세페이지로 갈...수...있을까....?-->
         {% if post.comment_set.all.count > 2 %}
         <div class="m-3">
-            <a href="" style="color: gray">댓글 <strong>{{ post.comments.count }}</strong>개 모두 보기</a>
+            <a href="" style="color: gray">댓글 <strong>{{ post.comment_set.all.count }}</strong>개 모두 보기</a>
         </div>
         {% endif %}
         
+        <!--댓글 표시-->
         {% if post.comment_set.all.count == False %}
         {% else %}
         {% for comment in post.comments %}
-        <div class="m-3"><strong>{{comment.user}}</strong> {{comment.content}}</div>
+        <div class="m-3"><strong><a href="{% url 'accounts:detail' comment.user %}" style="color: black">{{comment.user}} </a></strong>{{comment.content}}</div>
         {% endfor %}
         {% endif %}
+        
+        <!--댓글창-->
         <div class="row py-3" style="border: solid #efefef; border-width:1px 0px;">
             <div class="col-12">
                 
@@ -105,7 +122,7 @@
                     {% csrf_token %}
                     <div class="d-flex justify-content-between">
                         {{ comment_form }}
-                        <input type="submit" style="color:skyblue; background-color:white; border:white" value="게시">
+                        <input type="submit" style="color:skyblue; background-color: white; border: white" value="게시">
                     </div>
                     
                 </form>

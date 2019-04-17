@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block css %}
 <style>
 
@@ -7,6 +8,24 @@
         opacity: 0.5;
     }
 
+    #profile_img {
+        width: 150px; height: 150px;
+
+        border-radius: 50%;
+    }
+    #profile_img_mini {
+        width: 34px; height: 34px;
+        border-radius: 50%;
+    }
+    
+    ::-webkit-scrollbar {
+    
+    display:none;
+    
+    }
+
+
+
 </style>
 
 {% endblock %}
@@ -14,28 +33,53 @@
 
 {% block body %}
 <div id="inner" class="container m-5 " style="margin: 0 auto; max-width: 935px">
-    <div class="row d-flex justify-content-around">
+    <!--프로필 및 사진 및 수정 등-->
+    <div class="row d-flex">
+        <div class="col-1"></div>
         <div class="col-3">
-            <img src="https://picsum.photos/150/150">
+            {% if user_info.profile.image %}
+            <img id="profile_img" src="{{ user_info.profile.image.url }}">
+            {% else %}
+            <img id="profile_img" src="{% static '짱절미.jpg' %}" alt="profile">
+            {% endif %}
         </div>
 
-        <div class="col-6">
+        <div class="col-8">
             <div class="row" >
-                <div class="col-6" style="font-size: 32px">{{ user }}</div>
-                <div class="col-6" style="font-size: 24px">
+                <div class="col-5" style="font-size: 32px">
+                    {% if user_info.profile.nickname %}
+                    {{ user_info.profile.nickname }}
+                    {% else %}
+                    {{ user_info }}
+                    {% endif %}
+                </div>
+                <div class="col-2">
+                    {% if user != user_info %}
+                        {% if user in user_info.followers.all %}
+                        <a href="{% url 'accounts:follow' user_info %}">unfollow</a>
+                        {% else %}
+                        <a href="{% url 'accounts:follow' user_info %}">follow</a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+                <div class="col-5" style="font-size: 24px">
+                    {% if user == user_info %}
                     <a href="{% url 'accounts:edit' user %}" class="button btn-light" style="color-black">프로필 수정</a>
-
+                    {% endif %}
                 </div>
             </div>
             <div class="row my-4">
-                <div class="col-4">게시물 32</div>
-                <div class="col-4">팔로워 32</div>
-                <div class="col-4">팔로우 32</div>
+                <div class="col-4">게시물 {{ user_info.post_set.count }}</div>
+                <div class="col-4">팔로워 {{ user_info.followers.all.count}}</div>
+                <div class="col-4">팔로우 {{ user_info.followings.all.count}}</div>
             </div>
             <div class="row my-4">
                 <div class="col">
-                    
-                <pre>내 소개</pre>
+                {% if user_info.profile.introduction %}
+                <pre>{{ user_info.profile.introduction }}</pre>
+                {% else %}
+                <p>아직 자기소개가 없어요!</p>
+                {% endif %}
                 </div>
             </div>
         </div>
@@ -47,10 +91,12 @@
         <div class="col-2">저장됨</div>
         <div class="col-2">태그됨</div>
     </div>
-    {{ user }}
+    
+    <!--게시글 리스트-->
     <div class="row">
     {% for post in posts %}
     
+        <!--사진리스트-->
         <div id="size" class="col-4 my-3">
             <a href="{% url 'posts:detail' post.pk %}" data-toggle="modal" data-target="#Modal{{post.pk}}">
                 <div id="index_img" style="background-image:url({{ post.image_set.first.file.url }}); width:100%; height:0%; padding-bottom: 100%; background-position:center;">
@@ -58,20 +104,23 @@
             </a>
         </div>
         
-    
+        <!--게시글 모달-->
         <div class="modal fade" id="Modal{{post.pk}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" >
+            <!--모달 전체 엑스버튼-->
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
-            <div class="modal-dialog modal-dialog-centered modal-lg" role="document" style="max-height: 600px">
+            <!--모달 전체 틀-->
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document" style="max-height: 600px;">
+                <!--모달 컨텐츠-->
                 <div class="modal-content">
                     <div class="row">
-                        
+                        <!--이미지 carousel-->
                         <div class="col-6">
-                            <div id="carouse{{post.pk}}" class="carousel slide" data-ride="carousel" style="width: 100%; min-height: 384px;">
+                            <div id="carousel{{post.pk}}" class="carousel slide" data-ride="carousel" style="width: 100%; min-height: 384px;">
                                 <ol class="carousel-indicators">
                                     {% for image in post.image_set.all %}
-                                    <li data-target="#carouse{{post.pk}}" data-slide-to="{{forloop.counter}} - {{forloop.counter0}}" ></li>
+                                    <li data-target="#carousel{{post.pk}}" data-slide-to="{{forloop.counter}} - {{forloop.counter0}}" ></li>
                                     {% endfor %}
                                 </ol>
                                 <div class="carousel-inner" >
@@ -82,22 +131,29 @@
                                     </div>
                                     {% endfor %}
                                 </div>
-                                <a class="carousel-control-prev" href="#carouse{{post.pk}}" role="button" data-slide="prev">
+                                <a class="carousel-control-prev" href="#carousel{{post.pk}}" role="button" data-slide="prev">
                                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                                     <span class="sr-only">Previous</span>
                                 </a>
-                                <a class="carousel-control-next" href="#carouse{{post.pk}}" role="button" data-slide="next">
+                                <a class="carousel-control-next" href="#carousel{{post.pk}}" role="button" data-slide="next">
                                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
                                     <span class="sr-only">Next</span>
                                 </a>
                             </div>
                         </div>
-                        <div class="col-6">
-                            <div class="modal-header row">
-                                <div class="col-1">
-                                    <img scr="{{post.image_set.first.file.url}}" style="width:30px; height: 30px;">
+                        <!--post 내용-->
+                        <div class="col-6 d-flex flex-column" style="padding: 0px 30px 0px 0px;">
+                            <!--modal 헤더-->
+                            <div class="modal-header row d-flex justify-content-between" style="height: 72px;">
+                                <div class="col-8 p-0">
+                                    {% if post.user.profile.image %}
+                                    <img id="profile_img_mini" src="{{ post.user.profile.image.url }}">
+                                    {% else %}
+                                    <img id="profile_img_mini" src="{% static '짱절미.jpg' %}">
+                                    {% endif %}
+                                    <span class="modal-title" id="exampleModalCenterTitle" style="padding-left: 5px">{{ post.user }}</span>
                                 </div>
-                                <div class="col-8"><h5 class="modal-title" id="exampleModalCenterTitle">{{ post.user }}</h5></div>
+                                <!--<div class="col-8"><h5 class="modal-title" id="exampleModalCenterTitle">{{ post.user }}</h5></div>-->
                                 
                                 
                                 {% if post.user == user %}
@@ -120,27 +176,49 @@
                                 <div class="col-1"></div>
                                 {% endif %}
                             </div>
-    
-                            <div class="modal-body" style="height: 50%">
-                                
-                                <pre-line class="pre-scrollable" style="max-height: 100%">{{ post.content }}
-                                <br>
-                                <br>
+
+                            <div class="modal-body" style=" margin: 0px -15px; overflow-y: scroll; height: 191px; -ms-overflow-style: none;">
+                                <div class="row mb-5">
+                                    <div class="col-2">
+                                        {% if post.user.profile.image %}
+                                        <img id="profile_img_mini" src="{{ post.user.profile.image.url }}">
+                                        {% else %}
+                                        <img id="profile_img_mini" src="{% static '짱절미.jpg' %}">
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-10 pl-0">
+                                        <strong><a href="{% url 'accounts:detail' post.user %}" style="color: black;">{{ post.user }}</a></strong>
+                                        {{ post.content }}
+                                    </div>
+                                </div>
                                 {% for comment in post.comments %}
-                                {{ comment.content }}<br>
+                                <div class="row mb-3">
+                                    <div class="col-2">
+                                        {% if comment.user.profile.image %}
+                                        <img id="profile_img_mini" src="{{ comment.user.profile.image.url }}">
+                                        {% else %}
+                                        <img id="profile_img_mini" src="{% static '짱절미.jpg' %}">
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-10 pl-0">
+                                        <strong><a href="{% url 'accounts:detail' comment.user %}" style="color: black;">{{ comment.user }}</a></strong>
+                                        {{ comment.content }}
+                                    </div>
+                                </div>
                                 {% endfor %}
-                                </pre-line>
+
+                                
                             </div>
     
                             
                             <div class="modal-footer row d-flex justify-content-between p-0">
                             <!--<div class="modal-footer">-->
-                                <div class="col-4 d-flex justify-content-between">
+                                <div class="col-4 py-2 d-flex justify-content-between">
                                     <!--좋아요-->
                                     {% if user in post.like_users.all %}
-                                        <a href="{% url 'accounts:like' user post.pk%}?next={% url 'accounts:mypage' user %}" style="color: rgb(237, 73, 86);"><i class="fas fa-heart fa-lg"></i></a>
+                                        <a href="{% url 'accounts:like' user post.pk%}?next={% url 'accounts:detail' user_info %}" style="color: rgb(237, 73, 86);"><i class="fas fa-heart fa-lg"></i></a>
                                     {% else %}
-                                        <a href="{% url 'accounts:like' user post.pk%}?next={% url 'accounts:mypage' user %}" style="color: rgb(237, 73, 86);"><i class="far fa-heart fa-lg"></i></a>
+                                        <a href="{% url 'accounts:like' user post.pk%}?next={% url 'accounts:detail' user_info %}" style="color: rgb(237, 73, 86);"><i class="far fa-heart fa-lg"></i></a>
                                     {% endif %}
                                     <i class="far fa-comment fa-lg"></i>
                                     <i class="far fa-share-square fa-lg"></i>
@@ -157,8 +235,9 @@
                             </div>
                             
                             <hr>
-                            <div class="footer">
-                                <form action="{% url 'posts:create_comment' post.pk %}" method="POST">
+                            <!--댓글-->
+                            <div class="footer  mt-auto" style="height: 56px;">
+                                <form action="{% url 'posts:create_comment' post.pk %}?next={% url 'accounts:detail' user_info %}" method="POST">
                                     {% csrf_token %}
                                     
                                     <div class="form-row">
@@ -167,7 +246,7 @@
                                             {{ comment_form }}
                                         </div>
                                         <div class="form-group col-2">
-                                            <input type="submit" style="display:inline">
+                                            <input type="submit" style="display:inline; color:skyblue; background-color: white; border: white;">
                                         </div>
                                     </div>
                                     

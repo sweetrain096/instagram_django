@@ -1,13 +1,22 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 
 from .models import Post, Comment
 from .forms import PostForm, ImageForm, CommentForm
 
 # Create your views here.
+@login_required
 def list(request):
-    posts = Post.objects.order_by('-id')
+    # 내가 팔로우 한 글만 보기
+    # posts = Post.objects.filter(user__in=request.user.followings.all()).order_by('-id')
+    # post에 들어오는 내용을 내가 쓴 글까지 확인하기
+    
+    posts = Post.objects.filter(
+                        Q(user__in=request.user.followings.values('id'))
+                        | Q(user=request.user.id)
+                        ).order_by('-pk')
     comment_form = CommentForm()
     for post in posts:
         post.comments = post.comment_set.all()[:2]
@@ -71,7 +80,8 @@ def delete(request, post_pk):
     else:
         return redirect('posts:detail', post_pk)
         
-        
+
+    
 def create_comment(request, post_pk):
     print(post_pk)
     post = Post.objects.get(pk = post_pk)
@@ -83,5 +93,5 @@ def create_comment(request, post_pk):
             comment.post = post
             comment.user = request.user
             comment.save()
-
-    return redirect('posts:list')
+    return redirect(request.GET.get('next') or 'posts:list')
+    # return redirect('posts:list')
